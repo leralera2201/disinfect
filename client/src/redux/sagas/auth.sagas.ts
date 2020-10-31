@@ -6,11 +6,11 @@ import {
     setError,
     signIn, SignInRequestInterface
 } from "../actions/auth.actions";
-import axios from 'axios'
+import {axiosInstance as axios} from './../../axios-config/index'
 import {setAlert} from "../actions/alert.action";
 
 function signInRequest(user: SignInRequestInterface): Promise<SignInSuccessInterface> {
-    return axios.post('http://localhost:5000/api/auth/signin', user).then(({data}) => data)
+    return axios.post('/api/auth/signin', user).then(({data}) => data)
 }
 
 function* authWorker({payload}: SignInRequestActionInterface) {

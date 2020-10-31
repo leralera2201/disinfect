@@ -3,7 +3,8 @@ import {authWatcher} from "./sagas/auth.sagas";
 import {alertWatcher} from "./sagas/alert.sagas";
 import {categoriesWatcher} from "./sagas/category.sagas";
 import {productsWatcher} from "./sagas/product.sagas";
+import {ordersWatcher} from "./sagas/order.sagas";
 
 export function* allSagas() {
-    yield all([authWatcher(), alertWatcher(), categoriesWatcher(), productsWatcher()])
+    yield all([authWatcher(), alertWatcher(), categoriesWatcher(), productsWatcher(), ordersWatcher()])
 }

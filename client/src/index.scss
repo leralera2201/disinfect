@@ -165,11 +165,9 @@ input:focus{
 .pr-20{
   padding-right: 20px;
 }
-.table100{
-  overflow: hidden;
 
-}
 .table{
+  overflow: hidden;
   width: 100%;
   padding: 40px 30px 0;
   &-buttons{
@@ -295,7 +293,7 @@ input:focus{
 }
 
 .pagination{
-  width: 100vw;
+  width: calc(100vw - 40px);
   margin: 40px 0;
   display: flex;
   justify-content: center;

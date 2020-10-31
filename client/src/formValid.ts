@@ -2,6 +2,9 @@ interface Interface {
     errors: Object,
 }
 
+export const phoneRegex = RegExp(/((\+38)?\(?\d{3}\)?[\s\.-]?(\d{7}|\d{3}[\s\.-]\d{2}[\s\.-]\d{2}|\d{3}-\d{4}))/)
+export const nameRegex = RegExp(/^[\u0400-\u04FF]+([\s\.'][\u0400-\u04FF])*$/)
+
 export const formValid = ({ errors, ...rest }: Interface) => {
     let valid = true;
 

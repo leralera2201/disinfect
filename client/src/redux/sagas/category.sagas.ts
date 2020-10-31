@@ -1,5 +1,5 @@
 import {takeLatest, call, put} from 'redux-saga/effects'
-import axios from 'axios'
+import {axiosInstance as axios} from './../../axios-config/index'
 import {setAlert} from "../actions/alert.action";
 import {
     AddCategoryRequest,
@@ -12,12 +12,8 @@ import {
 const token = JSON.parse(localStorage.getItem('token') as string)
 
 function categoriesRequest(page: number, per_page: number, sort_order: string): Promise<CategoryPayloadFromServerInterface> {
-    return axios.get('http://localhost:5000/api/categories/all?page=' +
-        page + '&per_page=' + per_page + '&sort_order=' + sort_order, {
-        headers: {
-            'Authorization': 'Bearer ' + token
-        }
-    }).then(({data}) => data)
+    return axios.get('/api/categories/all?page=' +
+        page + '&per_page=' + per_page + '&sort_order=' + sort_order).then(({data}) => data)
 }
 
 function* categoriesWorker({payload}: CategoryRequestInterface) {
@@ -39,17 +35,9 @@ function* categoriesWorker({payload}: CategoryRequestInterface) {
 function addCategoryRequest(api: string, category: CategoryPayloadInterface){
     let req;
     if(api === 'POST'){
-        req = axios.post('http://localhost:5000/api/categories', category, {
-            headers: {
-                'Authorization': 'Bearer ' + token
-            }
-        })
+        req = axios.post('/api/categories', category)
     }else{
-        req = axios.put('http://localhost:5000/api/categories/' + category._id, category, {
-            headers: {
-                'Authorization': 'Bearer ' + token
-            }
-        })
+        req = axios.put('/api/categories/' + category._id, category)
     }
     return req.then(({data}) => data)
 }
@@ -77,11 +65,7 @@ function* addCategoryWorker({payload}: AddCategoryRequest) {
 }
 
 function deleteCategoryRequest(id: string){
-    return axios.delete('http://localhost:5000/api/categories/' + id, {
-        headers: {
-            'Authorization': 'Bearer ' + token
-        }
-    }).then(({data}) => data)
+    return axios.delete('/api/categories/' + id).then(({data}) => data)
 }
 
 function* deleteCategoryWorker({payload}: DeleteCategoryRequest) {

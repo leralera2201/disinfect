@@ -8,6 +8,9 @@ import AddFormCategory from "../components/AddFormCategory";
 import ProductTable from "../components/ProductTable";
 import AddFormProduct from "../components/AddFormProduct";
 import {ProductPayloadWithIdInterface} from "../redux/actions/product.action";
+import OrderTable from "../components/OrderTable";
+import {OrderInterfaceWithId} from "../redux/actions/order.action";
+import AddFormOrder from "../components/AddFormOrder";
 
 export interface ItemInterface {
     _id: string
@@ -23,6 +26,7 @@ const Table = () => {
     // const [showModalEdit, setShowModalEdit] = useState(false)
     const [item, setItem] = useState<ItemInterface | null>(null)
     const [productItem, setProductItem] = useState<ProductPayloadWithIdInterface | null>(null)
+    const [orderItem, setOrderItem] = useState<OrderInterfaceWithId | null>(null)
     const [sortOrder, setSortOrder] = useState('')
     const [showMenu, setShowMenu] = useState(false)
     const myRef = useRef<HTMLDivElement>(null)
@@ -41,12 +45,18 @@ const Table = () => {
         if(showModalAdd === false){
             setItem(null)
             setProductItem(null)
+            setOrderItem(null)
         }
     }, [showModalAdd])
 
     const setShowModeForProduct = (item: ProductPayloadWithIdInterface | null) => {
         setShowModalAdd(true)
         setProductItem(item)
+    }
+
+    const setShowModeForOrder = (item: OrderInterfaceWithId | null) => {
+        setShowModalAdd(true)
+        setOrderItem(item)
     }
 
     useEffect(() => {
@@ -72,7 +82,6 @@ const Table = () => {
 
     useEffect(() => {
         window.addEventListener('click', setWindowOpen)
-
         return () => {
             window.removeEventListener('click', setWindowOpen)
         }
@@ -94,7 +103,7 @@ const Table = () => {
 
     return <div className="overall">
         <LeftSideBar onHover={onHover} onUnHover={onUnHover} width={width} myRef={myRef}/>
-        <div className={`table ${pageURL === 'categories' && 'table100'}`} style={{marginLeft: marginLeft}}>
+        <div className='table' style={{marginLeft: marginLeft}}>
             <TableHeader
                 title={
                     pageURL === 'categories' ? 'Categories':
@@ -140,6 +149,29 @@ const Table = () => {
                         <AddFormProduct
                             setShowAdd={setShowModalAdd}
                             item={productItem}
+                            page={page}
+                            perPage={perPage}
+                            sortOrder={sortOrder}
+                        />
+                    </div>
+                }
+
+            </>}
+
+            {pageURL === 'orders' && <>
+                <OrderTable
+                    dispatch={dispatch}
+                    page={page}
+                    perPage={perPage}
+                    setPage={setPage}
+                    sortOrder={sortOrder}
+                    setShowModal={setShowModeForOrder}
+                />
+                {
+                    showModalAdd &&  <div className="modal">
+                        <AddFormOrder
+                            setShowAdd={setShowModalAdd}
+                            item={orderItem}
                             page={page}
                             perPage={perPage}
                             sortOrder={sortOrder}

@@ -6,7 +6,7 @@ import {FaCheck, FaTimes, FaEdit, FaTrashAlt} from 'react-icons/fa'
 import {IconContext} from 'react-icons'
 import Pagination from "./Pagination";
 import store from "../redux/store";
-import {deleteProduct, getProducts, ProductPayloadWithIdInterface} from "../redux/actions/product.action";
+import {deleteOrder, getOrders, OrderInterfaceWithId} from "../redux/actions/order.action";
 
 interface InputProps {
     dispatch: typeof store.dispatch,
@@ -14,12 +14,12 @@ interface InputProps {
     perPage: number,
     setPage: (page: number) => void,
     sortOrder: string,
-    setShowModal: (item: ProductPayloadWithIdInterface | null) => void
+    setShowModal: (item: OrderInterfaceWithId | null) => void
 }
 
-const ProductTable = ({dispatch, page, perPage, setPage, sortOrder, setShowModal}: InputProps) => {
+const OrderTable = ({dispatch, page, perPage, setPage, sortOrder, setShowModal}: InputProps) => {
 
-    const {items: {count, products}, loading, firstLoading} = useSelector((state: RootReducerType) =>  state.products)
+    const {items: {count, orders}, loading, firstLoading} = useSelector((state: RootReducerType) =>  state.orders)
 
     useEffect(() => {
 
@@ -36,16 +36,16 @@ const ProductTable = ({dispatch, page, perPage, setPage, sortOrder, setShowModal
 
     useEffect(() => {
         if(perPage < count || page === 1) {
-            dispatch(getProducts(page, perPage, sortOrder))
+            dispatch(getOrders(page, perPage, sortOrder))
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [page, perPage, sortOrder])
 
-    const deleteHandler = (item: ProductPayloadWithIdInterface) => {
-        let confirmed = window.confirm('Ви впевнені, що бажаєте видалити товар "' + item.title + '"?')
+    const deleteHandler = (item: OrderInterfaceWithId) => {
+        let confirmed = window.confirm('Ви впевнені, що бажаєте видалити замовлення "' + item.surname + ' ' + item.name + ' ' + item.totalPrice + '"?')
         if(confirmed){
-            dispatch(deleteProduct(item._id))
-            dispatch(getProducts(page, perPage,sortOrder))
+            dispatch(deleteOrder(item._id))
+            dispatch(getOrders(page, perPage,sortOrder))
         }
     }
 
@@ -55,8 +55,8 @@ const ProductTable = ({dispatch, page, perPage, setPage, sortOrder, setShowModal
             ?
            <Loading/>
             :
-            (!loading && products && products.length === 0) ?
-                'No items'
+            (!loading && orders && orders.length === 0) ?
+                'Немає замовлень'
                 :
                 <>
                     <div style={{overflowX: 'auto'}}>
@@ -64,46 +64,51 @@ const ProductTable = ({dispatch, page, perPage, setPage, sortOrder, setShowModal
                             <thead>
                             <tr>
                                 <th>#</th>
-                                <th style={{minWidth: 150}}>Фото</th>
-                                <th style={{minWidth: 150}}>Назва</th>
-                                <th style={{minWidth: 300}}>Опис</th>
-                                <th style={{minWidth: 150}}>Категорія</th>
-                                <th style={{minWidth: 300}}>Склад</th>
-                                <th style={{minWidth: 300}}>Застосування</th>
-                                <th>Бренд</th>
-                                <th>Ціна</th>
-                                <th>Знижка</th>
-                                <th>Нова ціна</th>
-                                <th>Розмір</th>
-                                <th>Розміри</th>
-                                <th>Кількість в наявності</th>
-                                <th>Країна</th>
-                                <th>Активна</th>
-                                <th>В наявності</th>
+                                <th style={{minWidth: 150}}>Клієнт</th>
+                                <th style={{minWidth: 150}}>Телефон</th>
+                                <th style={{minWidth: 500}}>Товар</th>
+                                <th>Загальна сума</th>
+                                <th style={{minWidth: 200}}>Комент</th>
+                                <th style={{minWidth: 200}}>Опис</th>
+                                <th>Дата створення</th>
+                                <th>Оплачений</th>
+                                <th>Активний</th>
                                 <th>Дії</th>
                             </tr>
                             </thead>
                             <tbody>
-                            {products.map((item, index) =>
+                            {orders.map((item, index) =>
                                 <tr key={item._id}>
                                     <th>{index+1}</th>
-                                    <th><img src={item.imageUrl} alt="Product" style={{maxWidth:'100px'}}/></th>
-                                    <th>{item.title}</th>
-                                    <th>{item.description ?? '-'}</th>
-                                    <th>{item.category.title ?? '-'}</th>
-                                    <th>{item.composition}</th>
-                                    <th>{item.method}</th>
-                                    <th>{item.brand}</th>
-                                    <th>{item.price}</th>
-                                    <th>{item.sale}</th>
-                                    <th>{item.newPrice}</th>
-                                    <th>{item.size}</th>
-                                    <th>{item.sizes.length > 0 ?
-                                        item.sizes.map(el => el.size).join(' | ')
-                                        : '-'
-                                    }</th>
-                                    <th>{item.countOfAvailability}</th>
-                                    <th>{item.country}</th>
+                                    <th>{item.surname + " " + item.name}</th>
+                                    <th>{item.phone}</th>
+                                    <th><table style={{minWidth: 500, background: 'rgb(235 238 241)'}}><tbody>{item.cartItems.map((cartItem, i) => <tr key={i}>
+                                        <th style={{minWidth: 50}}>{i+1}</th>
+                                        <th><img src={cartItem.product.imageUrl} alt="Product" style={{maxWidth:'100px'}}/></th>
+                                        <th>{cartItem.product.title}</th>
+                                        <th>{cartItem.product.size/1000}л.</th>
+                                        <th>{cartItem.product.newPrice} грн</th>
+                                        <th style={{minWidth: 50}}>{cartItem.qty}</th>
+                                    </tr>)}</tbody></table></th>
+                                    <th>{item.totalPrice} грн</th>
+                                    <th>{item.comment ? item.comment : '-'}</th>
+                                    <th>{item.description ? item.description : '-'}</th>
+                                    <th>{item.createdAt.toString().split('').slice(0,10).join('')}</th>
+                                    <th>
+                                        {item.isPaid
+                                            ?
+                                            <IconContext.Provider value={{ color: "#10b243", size: "18px"}}>
+                                                <div>
+                                                    <FaCheck />
+                                                </div>
+                                            </IconContext.Provider>
+                                            :
+                                            <IconContext.Provider value={{ color: "#DC3545", size: "20px"}}>
+                                                <div>
+                                                    <FaTimes />
+                                                </div>
+                                            </IconContext.Provider>
+                                        }</th>
                                     <th>
                                         {item.isActive
                                             ?
@@ -119,21 +124,7 @@ const ProductTable = ({dispatch, page, perPage, setPage, sortOrder, setShowModal
                                                 </div>
                                             </IconContext.Provider>
                                         }</th>
-                                    <th>
-                                        {item.isAvailable
-                                            ?
-                                            <IconContext.Provider value={{ color: "#10b243", size: "18px"}}>
-                                                <div>
-                                                    <FaCheck />
-                                                </div>
-                                            </IconContext.Provider>
-                                            :
-                                            <IconContext.Provider value={{ color: "#DC3545", size: "20px"}}>
-                                                <div>
-                                                    <FaTimes />
-                                                </div>
-                                            </IconContext.Provider>
-                                        }</th>
+
                                     <th >
                                         <div className="info-table__table-btns">
                                             <IconContext.Provider value={{ color: "#c0c0c0", size: "18px"}}>
@@ -165,4 +156,4 @@ const ProductTable = ({dispatch, page, perPage, setPage, sortOrder, setShowModal
     </div>
 }
 
-export default ProductTable
+export default OrderTable

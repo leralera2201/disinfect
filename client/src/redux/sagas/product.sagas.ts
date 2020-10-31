@@ -1,5 +1,5 @@
 import {takeLatest, call, put} from 'redux-saga/effects'
-import axios from 'axios'
+import {axiosInstance as axios} from './../../axios-config/index'
 import {setAlert} from "../actions/alert.action";
 import {
     AddProductRequest, DeleteProductRequest,
@@ -12,12 +12,9 @@ import {
 const token = JSON.parse(localStorage.getItem('token') as string)
 
 function productsRequest(page: number, per_page: number, sort_order: string): Promise<ProductPayloadFromServerInterface> {
-    return axios.get('http://localhost:5000/api/products/all?page=' +
-        page + '&per_page=' + per_page + '&sort_order=' + sort_order, {
-        headers: {
-            'Authorization': 'Bearer ' + token
-        }
-    }).then(({data}) => data)
+    return axios.get('/api/products/all?page=' +
+        page + '&per_page=' + per_page + '&sort_order=' + sort_order
+    ).then(({data}) => data)
 }
 
 function* productsWorker({payload}: ProductRequestInterface) {
@@ -39,17 +36,9 @@ function* productsWorker({payload}: ProductRequestInterface) {
 function addProductRequest(api: string, product: ProductPayloadInterface){
     let req;
     if(api === 'POST'){
-        req = axios.post('http://localhost:5000/api/products', product, {
-            headers: {
-                'Authorization': 'Bearer ' + token
-            }
-        })
+        req = axios.post('/api/products', product)
     }else{
-        req = axios.put('http://localhost:5000/api/products/' + product._id, product, {
-            headers: {
-                'Authorization': 'Bearer ' + token
-            }
-        })
+        req = axios.put('/api/products/' + product._id, product)
     }
     return req.then(({data}) => data)
 }
@@ -77,11 +66,7 @@ function* addProductWorker({payload}: AddProductRequest) {
 }
 
 function deleteProductRequest(id: string){
-    return axios.delete('http://localhost:5000/api/products/' + id, {
-        headers: {
-            'Authorization': 'Bearer ' + token
-        }
-    }).then(({data}) => data)
+    return axios.delete('/api/products/' + id).then(({data}) => data)
 }
 
 function* deleteProductWorker({payload}: DeleteProductRequest) {
