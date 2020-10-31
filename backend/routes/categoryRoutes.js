@@ -9,8 +9,10 @@ router.get('/all', isAuth, async (req,res) => {
         const per_page = req.query.per_page
         const sortOrder = req.query.sort_order ? {title: 1} : {_id: -1}
         const categories = await Category.find({}).sort(sortOrder)
-        const returnedCategories = categories.slice(page*per_page - per_page, page*per_page)
-
+        let returnedCategories = categories
+        if(parseInt(per_page)  !== 0){
+            returnedCategories = categories.slice(page*per_page - per_page, page*per_page)
+        }
         // const categories = await Category.find({}).skip(page*per_page - per_page).limit(page*per_page)
         res.json({categories: returnedCategories, count: categories.length})
     }catch (e) {

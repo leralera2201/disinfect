@@ -18,5 +18,6 @@ mongoose.connect(MONGO_URL, {
 app.use('/api/auth', require('./routes/userRoutes'))
 app.use('/api/products', require('./routes/productRoutes'))
 app.use('/api/categories', require('./routes/categoryRoutes'))
+app.use('/api/orders', require('./routes/orderRoutes'))
 
 app.listen(PORT, () => console.log('App was running...'))

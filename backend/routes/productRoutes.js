@@ -1,6 +1,6 @@
 const {Router} = require("express")
 const {Types} = require('mongoose')
-let ObjectId = Types.ObjectId
+// let ObjectId = Types.ObjectId
 const Product = require("./../models/Product")
 const router = new Router()
 const {isAuth} = require('../util')
@@ -24,35 +24,56 @@ const {isAuth} = require('../util')
 //     }
 // })
 
-router.get('/', async (req,res) => {
+router.post('/get', async (req,res) => {
     try{
-        const category = req.query.category ? req.query.category : '';
-        const searchKeyword = req.query.searchKeyword
+        const category = req.body.categories;
+        const country = req.body.countries;
+        const countriesCheck = country.length > 0 ? { country: { $in : country}} : {}
+        const categoriesCheck = category.length > 0 ? { title: {$in : category}} : {}
+
+        const searchKeyword = req.body.search
             ? {
                 title: {
-                    $regex: req.query.searchKeyword,
+                    $regex: req.body.search,
                     $options: 'i',
                 },
             }
             : {};
 
-        const minPrice = req.query.minprice ? +req.query.minprice : ''
-        const maxPrice = req.query.maxprice ? +req.query.maxprice : ''
-        const sortOrder = req.query.sortOrder
-            ? req.query.sortOrder === 'lowest'
+        const minPrice = req.body.minPrice ? +req.body.minPrice : 0
+        const maxPrice = req.body.maxPrice ? +req.body.maxPrice : 10000
+        const sortOrder = req.body.sortOrder
+            ? req.body.sortOrder === 'lowest'
                 ? { newPrice: 1 }
                 : { newPrice: -1 }
             : { _id: -1 };
-        const products = await Product.find({ ...searchKeyword, isActive: true }).populate('category').sort(
-            sortOrder
-        );
-        const categoryProducts = category ? products.filter(product => product.category.title.toLowerCase() === category) : products
-        const priceProducts = (minPrice && maxPrice) ?  categoryProducts.filter(product => product.newPrice > minPrice && product.newPrice < maxPrice) : category
-        res.json(priceProducts);
+        const products = await Product.find(
+            {   isActive: true,
+                ...countriesCheck,
+                ...searchKeyword,
+                newPrice: { $gte: minPrice, $lte: maxPrice },
+            })
+            .populate( 'category', null, categoriesCheck )
+            .sort(sortOrder);
+
+
+        res.json(products);
     }catch (e) {
         res.status(500).json({message: 'Щось пішло не так. Будь ласка, спробуйте знову.'})
     }
 
+})
+
+router.get('/filters', async (req,res) => {
+    try{
+        const products = await Product.find({})
+        const countries = Array.from(new Set(products.map(el => el.country)))
+        let minPrice = Math.min.apply(null, products.map(item => item.newPrice)),
+            maxPrice = Math.max.apply(null, products.map(item => item.newPrice));
+        res.json({minPrice, maxPrice, countries})
+    }catch (e) {
+        res.status(500).json({message: 'Щось пішло не так. Будь ласка, спробуйте знову.'})
+    }
 })
 
 router.get('/all', isAuth, async (req,res) => {
@@ -63,7 +84,10 @@ router.get('/all', isAuth, async (req,res) => {
         const products = await Product.find({}).populate('category').populate('sizes.product').sort(
             sortOrder
         );
-        const returnedProducts = products.slice(page*per_page - per_page, page*per_page)
+        let returnedProducts = products
+        if(parseInt(per_page) !== 0){
+            returnedProducts = products.slice(page*per_page - per_page, page*per_page)
+        }
         res.json({products: returnedProducts, count: products.length});
     }catch (e) {
         res.status(500).json({message: 'Щось пішло не так. Будь ласка, спробуйте знову.'})
